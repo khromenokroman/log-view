@@ -36,7 +36,7 @@ void LogView::run() {
                req.local_addr.c_str(), req.local_port);
 
         auto const &file = req.files.begin()->second;
-        syslog(LOG_INFO, "Размер файла %lu байт", file.content.size());
+        syslog(LOG_INFO, "Размер файла(%s) %lu байт", file.filename.c_str(), file.content.size());
         if (file.content.size() > 1024 * 1024 * 10) {
             std::ostringstream html;
             html << "<!doctype html><html><head><meta charset='utf-8'>"
@@ -65,7 +65,8 @@ void LogView::run() {
                  << "</div>"
                  << "</div>"
                  << "</body></html>";
-            syslog(LOG_ERR, "Размер файла(%lu байт) слишком большой, размер должен быть не более 10МБ", file.content.size());
+            syslog(LOG_ERR, "Размер файла(%s) %lu байт слишком большой, размер должен быть не более 10МБ",
+                   file.filename.c_str(), file.content.size());
             res.status = 404;
             res.set_content(html.str(), "text/html; charset=utf-8");
             return;
@@ -74,7 +75,7 @@ void LogView::run() {
         std::filesystem::path path = std::filesystem::path(m_storage_dir) / id;
         std::ofstream ofs(path, std::ios::binary);
         ofs << file.content;
-        syslog(LOG_INFO, "Лог сохранен в %s", path.c_str());
+        syslog(LOG_INFO, "Лог %s сохранен в %s", file.filename.c_str(), path.c_str());
 
         std::ostringstream html;
         html << "<!doctype html><html><head><meta charset='utf-8'>"
