@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.25.1)
 project(log-view
         VERSION 0.0.1
         LANGUAGES CXX
-        HOMEPAGE_URL "")
+        HOMEPAGE_URL "https://github.com/khromenokroman/log-view")
 
 find_package(fmt REQUIRED)
 set(CMAKE_CXX_STANDARD 20)
