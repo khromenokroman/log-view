@@ -86,11 +86,7 @@ namespace {
         auto const micros = static_cast<int>(us % 1000000);
 
         std::tm tm{};
-#if defined(_WIN32)
-        localtime_s(&tm, &sec);
-#else
         localtime_r(&sec, &tm);
-#endif
 
         std::ostringstream oss;
         oss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S") << '.' << std::setw(6) << std::setfill('0') << micros;
