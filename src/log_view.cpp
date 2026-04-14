@@ -65,6 +65,7 @@ void LogView::run() {
                  << "</div>"
                  << "</div>"
                  << "</body></html>";
+            syslog(LOG_ERR, "Размер файла(%lu байт) слишком большой, размер должен быть не более 10МБ", file.content.size());
             res.status = 404;
             res.set_content(html.str(), "text/html; charset=utf-8");
             return;
