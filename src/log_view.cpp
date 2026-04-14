@@ -465,7 +465,8 @@ std::string LogView::upload_page() const {
 <body>
   <div class="container">
     <h1>LogView</h1>
-    <p>Загрузите файл с логами и получите удобную ссылку для просмотра.</p>
+    <p>Загрузите файл с логами(как получить этот файл есть в примере ниже) и получите удобную ссылку для просмотра.</p>
+    <p>Размер загружаемого файла, не должен превышать размер в 10МБ</p>
 
     <div class="section">
       <form action="/upload" method="post" enctype="multipart/form-data">
