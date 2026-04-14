@@ -329,7 +329,7 @@ namespace {
     <div class="section">
       <form action="/upload" method="post" enctype="multipart/form-data">
         <div class="file-row">
-          <input type="file" name="logfile" accept=".log,.txt,.json,*/*">
+          <input type="file" name="logfile" accept=".log,.txt,.json,*/*" required>
         </div>
 
         <div class="buttons">
