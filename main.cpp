@@ -10,8 +10,6 @@
 #include <string>
 #include <string_view>
 
-namespace fs = std::filesystem;
-
 namespace {
 
     std::string html_escape(std::string_view s) {
@@ -351,7 +349,7 @@ namespace {
 } // namespace
 
 int main() {
-    fs::create_directories("storage");
+    std::filesystem::create_directories("storage");
 
     httplib::Server svr;
 
@@ -368,12 +366,10 @@ int main() {
 
         const auto &file = req.files.begin()->second;
         std::string id = random_id();
-        fs::path path = fs::path("storage") / id;
+        std::filesystem::path path = std::filesystem::path("storage") / id;
 
-        {
-            std::ofstream ofs(path, std::ios::binary);
-            ofs << file.content;
-        }
+        std::ofstream ofs(path, std::ios::binary);
+        ofs << file.content;
 
         std::ostringstream html;
         html << "<!doctype html><html><head><meta charset='utf-8'>"
@@ -408,37 +404,41 @@ int main() {
 
     svr.Get(R"(/view/([0-9a-fA-F]+))", [](const httplib::Request &req, httplib::Response &res) {
         std::string id = req.matches[1];
-        fs::path path = fs::path("storage") / id;
+        std::filesystem::path path = std::filesystem::path("storage") / id;
 
-        if (!fs::exists(path)) {
-        std::ostringstream html;
-        html << "<!doctype html><html><head><meta charset='utf-8'>"
-             << "<meta name='viewport' content='width=device-width, initial-scale=1'>"
-             << "<title>LogView</title>"
-             << "<style>"
-             << "body{margin:0;font-family:Cambria,serif;background:#fff;color:#222;padding:48px 24px;font-size:20px;}"
-             << ".container{max-width:900px;margin:0 auto;}"
-             << "p{line-height:1.7;margin:0 0 16px;font-size:1.15rem;}"
-             << ".section{margin-top:28px;padding:24px;border:1px solid #e5e5e5;border-radius:14px;background:#fafafa;}"
-             << ".btn{display:inline-flex;align-items:center;justify-content:center;padding:14px 20px;border-radius:12px;text-decoration:none;font:inherit;font-size:1.05rem;cursor:pointer;border:none;transition:transform .15s ease,box-shadow .15s ease,background .15s ease;}"
-             << ".btn:hover{transform:translateY(-1px);}"
-             << ".btn-secondary{background:#f3f3f3;color:#222;border:1px solid #d7d7d7;}"
-             << ".btn-secondary:hover{box-shadow:0 8px 18px rgba(0,0,0,.08);}"
-             << "a{color:inherit;}"
-             << "</style></head><body>"
-             << "<div class='container'>"
-             << "<div class='section'>"
-             << "<p>Файл не найден.</p>"
-             << "<p>Возможно, ссылка устарела или файл был удалён.</p>"
-             << "<p><a class='btn btn-secondary' href='/'>Загрузить ещё</a></p>"
-             << "</div>"
-             << "</div>"
-             << "</body></html>";
+        if (!std::filesystem::exists(path)) {
+            std::ostringstream html;
+            html << "<!doctype html><html><head><meta charset='utf-8'>"
+                 << "<meta name='viewport' content='width=device-width, initial-scale=1'>"
+                 << "<title>LogView</title>"
+                 << "<style>"
+                 << "body{margin:0;font-family:Cambria,serif;background:#fff;color:#222;padding:48px "
+                    "24px;font-size:20px;}"
+                 << ".container{max-width:900px;margin:0 auto;}"
+                 << "p{line-height:1.7;margin:0 0 16px;font-size:1.15rem;}"
+                 << ".section{margin-top:28px;padding:24px;border:1px solid "
+                    "#e5e5e5;border-radius:14px;background:#fafafa;}"
+                 << ".btn{display:inline-flex;align-items:center;justify-content:center;padding:14px "
+                    "20px;border-radius:12px;text-decoration:none;font:inherit;font-size:1.05rem;cursor:pointer;border:"
+                    "none;transition:transform .15s ease,box-shadow .15s ease,background .15s ease;}"
+                 << ".btn:hover{transform:translateY(-1px);}"
+                 << ".btn-secondary{background:#f3f3f3;color:#222;border:1px solid #d7d7d7;}"
+                 << ".btn-secondary:hover{box-shadow:0 8px 18px rgba(0,0,0,.08);}"
+                 << "a{color:inherit;}"
+                 << "</style></head><body>"
+                 << "<div class='container'>"
+                 << "<div class='section'>"
+                 << "<p>Файл не найден.</p>"
+                 << "<p>Возможно, ссылка устарела или файл был удалён.</p>"
+                 << "<p><a class='btn btn-secondary' href='/'>Загрузить ещё</a></p>"
+                 << "</div>"
+                 << "</div>"
+                 << "</body></html>";
 
-        res.status = 404;
-        res.set_content(html.str(), "text/html; charset=utf-8");
-        return;
-    }
+            res.status = 404;
+            res.set_content(html.str(), "text/html; charset=utf-8");
+            return;
+        }
 
         std::ifstream ifs(path, std::ios::binary);
         std::ostringstream buffer;
