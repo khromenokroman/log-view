@@ -1,5 +1,5 @@
 [Unit]
-Description=JSON Formatter Web Service
+Description=Log View Web Service
 After=network-online.target
 Wants=network-online.target
 
