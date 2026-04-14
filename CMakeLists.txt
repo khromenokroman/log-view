@@ -9,18 +9,19 @@ set(CMAKE_CXX_STANDARD 20)
 
 configure_file(Version.in Version @ONLY)
 
-add_executable(${PROJECT_NAME} src/main.cpp)
+add_executable(${PROJECT_NAME}
+        src/main.cpp
+        src/log_view.cpp
+)
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt cpp-httplib)
 
 include(GNUInstallDirs)
 
 install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-
 install(FILES configuration/cfg.json
         DESTINATION /etc/log-view/
 )
-
 install(FILES systemd/log-view.service
         DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/systemd/system
 )
