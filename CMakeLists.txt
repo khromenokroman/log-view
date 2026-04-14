@@ -1,5 +1,8 @@
-cmake_minimum_required(VERSION 4.2)
-project(log-view)
+cmake_minimum_required(VERSION 3.25.1)
+project(log-view
+        VERSION 0.0.1
+        LANGUAGES CXX
+        HOMEPAGE_URL "")
 
 find_package(fmt REQUIRED)
 set(CMAKE_CXX_STANDARD 20)
