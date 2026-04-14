@@ -25,16 +25,15 @@ void LogView::run() {
 
     std::filesystem::create_directories(m_storage_dir);
 
-    m_server.Get("/", [this](httplib::Request const &, httplib::Response &res) {
+    m_server.Get("/", [this](httplib::Request const &req, httplib::Response &res) {
+        syslog(LOG_INFO, "Поступил запрос('/') от %s:%d на %s:%d", req.remote_addr.c_str(), req.remote_port,
+               req.local_addr.c_str(), req.local_port);
         res.set_content(upload_page(), "text/html; charset=utf-8");
     });
 
     m_server.Post("/upload", [this](httplib::Request const &req, httplib::Response &res) {
-        if (req.files.empty()) {
-            res.status = 400;
-            res.set_content("Файл не загружен", "text/plain; charset=utf-8");
-            return;
-        }
+        syslog(LOG_INFO, "Поступил запрос('/upload') от %s:%d на %s:%d", req.remote_addr.c_str(), req.remote_port,
+               req.local_addr.c_str(), req.local_port);
 
         auto const &file = req.files.begin()->second;
         std::string id = random_id();
@@ -75,6 +74,9 @@ void LogView::run() {
     });
 
     m_server.Get(R"(/view/([0-9a-fA-F]+))", [this](httplib::Request const &req, httplib::Response &res) {
+        syslog(LOG_INFO, "Поступил запрос('/view') от %s:%d на %s:%d", req.remote_addr.c_str(), req.remote_port,
+               req.local_addr.c_str(), req.local_port);
+
         std::string id = req.matches[1];
         std::filesystem::path path = std::filesystem::path("storage") / id;
 
@@ -107,6 +109,7 @@ void LogView::run() {
                  << "</div>"
                  << "</body></html>";
 
+            syslog(LOG_DEBUG, "Файл %s не найден в %s", id.c_str(), m_storage_dir.c_str());
             res.status = 404;
             res.set_content(html.str(), "text/html; charset=utf-8");
             return;
@@ -116,6 +119,7 @@ void LogView::run() {
         std::ostringstream buffer;
         buffer << ifs.rdbuf();
 
+        syslog(LOG_DEBUG, "Файл %s записан в %s", id.c_str(), m_storage_dir.c_str());
         res.set_content(render_log_file(buffer.str()), "text/html; charset=utf-8");
     });
 
@@ -255,6 +259,7 @@ std::string LogView::render_log_file(std::string_view content) const {
         try {
             auto json = nlohmann::json::parse(line);
 
+            syslog(LOG_DEBUG, "Строка для парсинга:\n%s", json.dump(2).c_str());
             auto ts = json.value("__REALTIME_TIMESTAMP", "");
             auto host = json.value("_HOSTNAME", "");
             auto ident = json.value("SYSLOG_IDENTIFIER", json.at("_COMM").get<std::string>());
