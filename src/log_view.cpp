@@ -37,10 +37,10 @@ void LogView::run() {
 
         auto const &file = req.files.begin()->second;
         std::string id = random_id();
-        std::filesystem::path path = std::filesystem::path("storage") / id;
-
+        std::filesystem::path path = std::filesystem::path(m_storage_dir) / id;
         std::ofstream ofs(path, std::ios::binary);
         ofs << file.content;
+        syslog(LOG_INFO, "Лог сохранен в %s", path.c_str());
 
         std::ostringstream html;
         html << "<!doctype html><html><head><meta charset='utf-8'>"
@@ -78,7 +78,7 @@ void LogView::run() {
                req.local_addr.c_str(), req.local_port);
 
         std::string id = req.matches[1];
-        std::filesystem::path path = std::filesystem::path("storage") / id;
+        std::filesystem::path path = std::filesystem::path(m_storage_dir) / id;
 
         if (!std::filesystem::exists(path)) {
             std::ostringstream html;
