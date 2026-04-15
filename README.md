@@ -1,6 +1,6 @@
 # LogViewer
 
-![LogView preview](logo/logo/logo.jpeg)
+![LogView preview](logo/logo/logo.png)
 
 **LogView** — веб-сервис для удобного просмотра логов в браузере.
 
