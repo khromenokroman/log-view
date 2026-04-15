@@ -67,8 +67,21 @@ apt install -y ./log-view_<версия>_amd64.deb
 
 ### Параметры(cfg.json)
 
+````json
+{
+"max_storage_size":  5368709120,
+"port": 80,
+"log_level": 6,
+"storage_path": "/var/log-view/storage/"
+}
+````
+
 - `port` — порт, на котором запускается HTTP-сервер
 - `log_level` — уровень логирования для `syslog`
+- 'max_storage_size' — максимальный размер хранилища в байтах
+- 'storage_path' — путь к хранилищу
+
+
 
 Возможные уровнилогирования:
 
