@@ -1,5 +1,6 @@
 #include "log_view.hpp"
 #include <fmt/format.h>
+#include <fmt/ranges.h>
 #include <nlohmann/json.hpp>
 #include <syslog.h>
 
@@ -19,6 +20,7 @@ LogView::LogView() {
     auto log_level = cfg.value("log_level", LOG_INFO);
     setlogmask(LOG_UPTO(log_level));
     m_storage_dir = cfg.at("storage_path");
+    m_max_storage_size = cfg.at("max_storage_size");
     syslog(LOG_INFO, "Получены настройки:\n%s", cfg.dump(1).c_str());
 }
 void LogView::run() {
@@ -26,12 +28,20 @@ void LogView::run() {
     std::filesystem::create_directories(m_storage_dir);
 
     m_server.Get("/", [this](httplib::Request const &req, httplib::Response &res) {
+        if (storage_size() > m_max_storage_size) {
+            syslog(LOG_INFO, "Хранилище переполнено, удаляю старые логи...");
+            remove_old_logs();
+        }
         syslog(LOG_INFO, "Поступил запрос('/') от %s:%d на %s:%d", req.remote_addr.c_str(), req.remote_port,
                req.local_addr.c_str(), req.local_port);
         res.set_content(upload_page(), "text/html; charset=utf-8");
     });
 
     m_server.Post("/upload", [this](httplib::Request const &req, httplib::Response &res) {
+        if (storage_size() > m_max_storage_size) {
+            syslog(LOG_INFO, "Хранилище переполнено, удаляю старые логи...");
+            remove_old_logs();
+        }
         syslog(LOG_INFO, "Поступил запрос('/upload') от %s:%d на %s:%d", req.remote_addr.c_str(), req.remote_port,
                req.local_addr.c_str(), req.local_port);
 
@@ -490,4 +500,49 @@ std::string LogView::upload_page() const {
   </div>
 </body>
 </html>)HTML";
+}
+void LogView::remove_old_logs() const {
+    namespace fs = std::filesystem;
+
+    auto const now = fs::file_time_type::clock::now();
+    auto const two_weeks = std::chrono::hours(24 * 14);
+    auto const cutoff = now - two_weeks;
+    std::size_t removed_files = 0;
+
+    for (const auto &entry: fs::directory_iterator(m_storage_dir)) {
+        if (!entry.is_regular_file()) {
+            continue;
+        }
+
+        std::error_code ec;
+        const auto time = entry.last_write_time(ec);
+        if (ec) {
+            syslog(LOG_ERR, "Не удалось получить время файла %s: %s", entry.path().c_str(), ec.message().c_str());
+            continue;
+        }
+
+        if (time < cutoff) {
+            std::error_code remove_ec;
+            fs::remove(entry.path(), remove_ec);
+            if (remove_ec) {
+                syslog(LOG_ERR, "Не удалось удалить старый лог %s: %s", entry.path().c_str(),
+                       remove_ec.message().c_str());
+            } else {
+                ++removed_files;
+                syslog(LOG_DEBUG, "Удален старый лог %s", entry.path().c_str());
+            }
+        }
+    }
+    syslog(LOG_INFO, "Удалено файлов %lu", removed_files);
+}
+std::size_t LogView::storage_size() const {
+    namespace fs = std::filesystem;
+    std::size_t size = 0;
+    for (auto const &file: fs::directory_iterator(m_storage_dir)) {
+        if (file.is_regular_file()) {
+            size += file.file_size();
+        }
+    }
+    syslog(LOG_DEBUG, "Текущий размер хранилища: %lu байт", size);
+    return size;
 }
