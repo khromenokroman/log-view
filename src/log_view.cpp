@@ -367,7 +367,7 @@ std::string LogView::upload_page() const {
   <style>
     body {
       margin: 0;
-      font-family:'DejaVu Sans Mono';
+      font-family: Cambria, serif;
       background: #ffffff;
       color: #222;
       padding: 48px 24px;
@@ -405,7 +405,7 @@ std::string LogView::upload_page() const {
       background: #f4f4f4;
       border-radius: 10px;
       overflow: auto;
-      font-family:'DejaVu Sans Mono';
+      font-family: 'DejaVu Sans Mono', monospace;
       font-size: 1.05rem;
       line-height: 1.5;
     }
