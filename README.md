@@ -78,8 +78,8 @@ apt install -y ./log-view_<версия>_amd64.deb
 
 - `port` — порт, на котором запускается HTTP-сервер
 - `log_level` — уровень логирования для `syslog`
-- 'max_storage_size' — максимальный размер хранилища в байтах
-- 'storage_path' — путь к хранилищу
+- `max_storage_size` — максимальный размер хранилища в байтах
+- `storage_path` — путь к хранилищу
 
 
 
