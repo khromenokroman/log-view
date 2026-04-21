@@ -314,7 +314,10 @@ std::string LogView::render_log_file(std::string_view content) const {
                 ident = json["_COMM"].get<std::string>();
             }
             auto pid = json.value("_PID", "unknown");
-            auto msg = json.value("MESSAGE", "");
+            std::string msg;
+            if (json.contains("MESSAGE") && !json["MESSAGE"].is_null()) {
+                msg = json["MESSAGE"].get<std::string>();
+            }
             auto prio_str = json.value("PRIORITY", "6");
 
             int prio = 6;
