@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.25.1)
 project(log-view
-        VERSION 0.3.1
+        VERSION 0.3.2
         LANGUAGES CXX
         HOMEPAGE_URL "https://github.com/khromenokroman/log-view")
 
