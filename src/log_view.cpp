@@ -307,7 +307,12 @@ std::string LogView::render_log_file(std::string_view content) const {
             syslog(LOG_DEBUG, "Строка для парсинга:\n%s", json.dump(2).c_str());
             auto ts = json.value("__REALTIME_TIMESTAMP", "");
             auto host = json.value("_HOSTNAME", "");
-            auto ident = json.value("SYSLOG_IDENTIFIER", json.at("_COMM").get<std::string>());
+            std::string ident;
+            if (json.contains("SYSLOG_IDENTIFIER")) {
+                ident = json["SYSLOG_IDENTIFIER"].get<std::string>();
+            } else if (json.contains("_COMM")) {
+                ident = json["_COMM"].get<std::string>();
+            }
             auto pid = json.value("_PID", "unknown");
             auto msg = json.value("MESSAGE", "");
             auto prio_str = json.value("PRIORITY", "6");
